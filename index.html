@@ -1,853 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Akashic Reaction Time</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1034 50%, #2d1b4e 100%);
-            min-height: 100vh;
-            color: #e8e8f0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .title {
-            font-size: 3em;
-            font-weight: bold;
-            background: linear-gradient(135deg, #ffd700, #ff8c00, #8a2be2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            letter-spacing: 4px;
-            text-align: center;
-        }
-
-        .subtitle {
-            color: #d4af37;
-            font-size: 1.2em;
-            font-style: italic;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 3px solid rgba(212, 175, 55, 0.5);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 700px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
-        }
-
-        .hidden { display: none !important; }
-
-        .back-home {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            border-radius: 20px;
-            color: #ffd700;
-            text-decoration: none;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            z-index: 1000;
-        }
-
-        .back-home:hover {
-            background: rgba(255, 215, 0, 0.2);
-            border-color: #ffd700;
-        }
-
-        /* ==================== PIN ENTRY STYLES ==================== */
-        .pin-title {
-            color: #ffd700;
-            font-size: 1.5em;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .pin-subtitle {
-            color: #b8b8cc;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 0.95em;
-        }
-
-        .pin-dots {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .pin-dot {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid rgba(212, 175, 55, 0.5);
-            background: transparent;
-            transition: all 0.2s ease;
-        }
-
-        .pin-dot.filled {
-            background: #ffd700;
-            border-color: #ffd700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-
-        .pin-keypad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            max-width: 280px;
-            margin: 0 auto 20px;
-        }
-
-        .pin-key {
-            aspect-ratio: 1/1;
-            font-size: 1.8em;
-            font-family: 'Georgia', serif;
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            background: rgba(255, 255, 255, 0.05);
-            color: #e8e8f0;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .pin-key:hover {
-            background: rgba(255, 215, 0, 0.1);
-            border-color: rgba(255, 215, 0, 0.5);
-        }
-
-        .pin-key:active {
-            transform: scale(0.95);
-            background: rgba(255, 215, 0, 0.2);
-        }
-
-        .pin-key.delete { font-size: 1.2em; }
-        .pin-key.empty { visibility: hidden; }
-
-        .pin-message {
-            text-align: center;
-            min-height: 24px;
-            margin-top: 15px;
-            font-size: 0.95em;
-        }
-
-        .pin-message.error { color: #ff6b6b; }
-        .pin-message.success { color: #4ecdc4; }
-
-        .pin-toggle {
-            text-align: center;
-            margin-top: 25px;
-            color: #b8b8cc;
-        }
-
-        .pin-toggle-link {
-            color: #ffd700;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        /* ==================== GAME STYLES ==================== */
-        .button {
-            width: 100%;
-            background: linear-gradient(135deg, #ffd700, #ff8c00);
-            color: #1a1034;
-            border: none;
-            padding: 15px;
-            border-radius: 30px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Georgia', serif;
-            margin-top: 10px;
-            transition: all 0.3s ease;
-        }
-        .button:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255, 215, 0, 0.6); }
-        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .button.secondary { background: linear-gradient(135deg, #8a2be2, #4b0082); color: #fff; }
-
-        .welcome-box {
-            background: rgba(255, 215, 0, 0.1);
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        .welcome-box h3 { color: #ffd700; margin-bottom: 5px; }
-
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
-        .stat-box {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            border: 1px solid rgba(212, 175, 55, 0.2);
-        }
-        .stat-value { font-size: 2em; color: #ffd700; font-weight: bold; }
-        .stat-label { color: #b8b8cc; font-size: 0.85em; margin-top: 5px; }
-
-        .user-bar { text-align: center; margin-bottom: 20px; color: #d4af37; }
-        .user-bar strong { color: #ffd700; }
-
-        .game-info { display: flex; justify-content: space-around; margin: 20px 0; padding: 20px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; }
-        .info-item { text-align: center; }
-        .info-value { font-size: 1.8em; color: #ffd700; font-weight: bold; }
-        .info-label { color: #b8b8cc; font-size: 0.85em; margin-top: 5px; }
-
-        /* ==================== REACTION AREA ==================== */
-        .display-area {
-            min-height: 300px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 3px solid rgba(212, 175, 55, 0.3);
-            border-radius: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 20px 0;
-            padding: 40px 20px;
-            transition: all 0.15s ease;
-            cursor: default;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            touch-action: manipulation;
-        }
-
-        .display-area.waiting {
-            background: linear-gradient(135deg, #c92a2a, #8b0000);
-            border-color: #ff6b6b;
-            cursor: pointer;
-        }
-
-        .display-area.ready {
-            background: linear-gradient(135deg, #2f9e44, #1b5e20);
-            border-color: #51cf66;
-            cursor: pointer;
-            animation: pulse 0.3s ease;
-        }
-
-        .display-area.too-soon {
-            background: linear-gradient(135deg, #ff6b6b, #c92a2a);
-            border-color: #ff4646;
-            animation: shake 0.4s ease;
-        }
-
-        .display-area.result {
-            background: linear-gradient(135deg, #1a1a3e, #2d1b4e);
-            border-color: #ffd700;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-8px); }
-            40% { transform: translateX(8px); }
-            60% { transform: translateX(-8px); }
-            80% { transform: translateX(8px); }
-        }
-
-        .message-text { 
-            font-size: 1.8em; 
-            color: #fff; 
-            text-align: center; 
-            line-height: 1.4;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-        }
-
-        .time-display {
-            font-size: 4em;
-            color: #ffd700;
-            font-weight: bold;
-            text-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
-            font-family: 'Courier New', monospace;
-        }
-
-        .results-box {
-            background: rgba(10, 14, 39, 0.95);
-            border: 3px solid #ffd700;
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 20px;
-            text-align: center;
-        }
-        .results-box h3 { color: #ffd700; font-size: 2em; margin-bottom: 20px; }
-        .result-value { font-size: 4em; color: #ffd700; font-weight: bold; text-shadow: 0 0 20px rgba(255, 215, 0, 0.8); margin: 20px 0; }
-        .result-message { font-size: 1.2em; color: #c4c4d8; margin: 15px 0; }
-        .new-record { background: rgba(255, 215, 0, 0.2); border: 2px solid #ffd700; border-radius: 10px; padding: 15px; margin: 20px 0; font-size: 1.3em; color: #ffd700; font-weight: bold; }
-
-        .instructions {
-            background: rgba(138, 43, 226, 0.1);
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-        .instructions h4 { color: #8a2be2; margin-bottom: 10px; text-align: center; }
-        .instructions p { color: #c4c4d4; line-height: 1.6; text-align: center; }
-
-        @media (max-width: 768px) {
-            .title { font-size: 2em; }
-            .container { padding: 20px 15px; }
-            .back-home { position: relative; top: auto; left: auto; display: inline-block; margin-bottom: 20px; }
-            .display-area { min-height: 280px; padding: 30px 15px; margin: 15px 0; }
-            .message-text { font-size: 1.5em; }
-            .time-display { font-size: 3em; }
-            .game-info { padding: 15px; margin: 15px 0; }
-            .info-value { font-size: 1.5em; }
-            .pin-keypad { max-width: 240px; }
-            .pin-key { font-size: 1.5em; }
-        }
-
-        @media (max-width: 400px) {
-            .container { padding: 15px 12px; }
-            .display-area { min-height: 250px; padding: 25px 12px; }
-            .message-text { font-size: 1.3em; }
-            .time-display { font-size: 2.5em; }
-            .game-info { padding: 12px; }
-            .info-value { font-size: 1.4em; }
-            .info-label { font-size: 0.75em; }
-            .pin-keypad { max-width: 200px; gap: 8px; }
-            .pin-key { font-size: 1.3em; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Reaction Time</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Georgia,serif;background:linear-gradient(135deg,#0a0e27,#1a1034,#2d1b4e);min-height:100vh;color:#e8e8f0;display:flex;flex-direction:column;align-items:center;padding:8px}
+.title{font-size:1.4em;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#d4af37;margin-bottom:6px;font-size:0.8em}
+.box{background:rgba(255,255,255,0.05);border:2px solid rgba(212,175,55,0.5);border-radius:12px;padding:10px;width:calc(100% - 16px);max-width:340px}
+.hidden{display:none!important}
+.banner{background:rgba(255,215,0,0.2);border:1px solid rgba(255,215,0,0.5);color:#ffd700;padding:4px 8px;border-radius:8px;font-size:0.7em}
+.back{padding:4px 8px;background:rgba(255,255,255,0.1);border:1px solid rgba(212,175,55,0.3);border-radius:8px;color:#ffd700;text-decoration:none;font-size:0.7em}
+.top-bar{width:calc(100% - 16px);max-width:340px;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.popup-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:flex;justify-content:center;align-items:center;z-index:5000}
+.popup{background:linear-gradient(135deg,#1a1034,#2d1b4e);border:2px solid rgba(255,215,0,0.3);border-radius:12px;padding:16px;width:90%;max-width:260px;text-align:center}
+.popup h3{color:#e8e8f0;margin-bottom:4px}
+.popup p{color:#a0a0b8;font-size:0.75em;margin-bottom:12px}
+.popup a{display:block;padding:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);border-radius:6px;color:#e8e8f0;text-decoration:none;margin-bottom:10px}
+.popup button{width:100%;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1034;border:none;padding:8px;border-radius:12px;font-weight:bold;cursor:pointer}
+.pin-title{color:#ffd700;font-size:1em;text-align:center;margin-bottom:4px}
+.pin-sub{color:#b8b8cc;text-align:center;margin-bottom:12px;font-size:0.75em}
+.dots{display:flex;justify-content:center;gap:8px;margin-bottom:12px}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid rgba(212,175,55,0.5)}
+.dot.on{background:#ffd700;border-color:#ffd700}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;max-width:180px;margin:0 auto 10px}
+.key{aspect-ratio:1;font-size:1.1em;border:2px solid rgba(212,175,55,0.3);background:rgba(255,255,255,0.05);color:#e8e8f0;border-radius:6px;cursor:pointer}
+.key.empty{visibility:hidden}
+.msg{text-align:center;min-height:16px;font-size:0.75em}
+.msg.err{color:#ff6b6b}.msg.ok{color:#4ecdc4}
+.toggle{text-align:center;margin-top:10px;color:#b8b8cc;font-size:0.75em}
+.toggle span{color:#ffd700;cursor:pointer;text-decoration:underline}
+.btn{width:100%;background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1034;border:none;padding:10px;border-radius:15px;font-size:0.85em;font-weight:bold;cursor:pointer;margin-top:5px}
+.btn2{background:linear-gradient(135deg,#8a2be2,#4b0082);color:#fff}
+.welcome{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:10px;margin-bottom:10px;text-align:center}
+.welcome h3{color:#ffd700;margin-bottom:2px}
+.welcome p{font-size:0.75em;color:#b8b8cc}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:10px 0}
+.stat{background:rgba(255,255,255,0.05);padding:8px;border-radius:6px;text-align:center;border:1px solid rgba(212,175,55,0.2)}
+.stat b{display:block;font-size:1.2em;color:#ffd700}
+.stat span{color:#b8b8cc;font-size:0.65em}
+.game-info{display:flex;justify-content:space-between;margin-bottom:10px}
+.game-stat{text-align:center}
+.game-stat b{display:block;font-size:1.1em;color:#ffd700}
+.game-stat span{color:#b8b8cc;font-size:0.65em}
+.react-zone{width:100%;height:220px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin:10px 0;user-select:none}
+.react-zone.waiting{background:linear-gradient(135deg,#e74c3c,#c0392b)}
+.react-zone.ready{background:linear-gradient(135deg,#2ecc71,#27ae60)}
+.react-zone.result{background:linear-gradient(135deg,#3498db,#2980b9)}
+.react-zone.early{background:linear-gradient(135deg,#e67e22,#d35400)}
+.react-zone h2{color:#fff;font-size:1.3em;margin-bottom:5px}
+.react-zone p{color:rgba(255,255,255,0.9);font-size:0.85em}
+.react-zone .time{font-size:3em;color:#fff;font-weight:bold}
+.round-dots{display:flex;justify-content:center;gap:8px;margin:10px 0}
+.round-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(212,175,55,0.3)}
+.round-dot.done{background:#2ecc71;border-color:#2ecc71}
+.round-dot.current{background:#ffd700;border-color:#ffd700}
+.round-dot.early{background:#e74c3c;border-color:#e74c3c}
+.res-bg{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);display:flex;justify-content:center;align-items:center;z-index:3000}
+.res{background:linear-gradient(135deg,#1a1034,#2d1b4e);border:2px solid #ffd700;border-radius:12px;padding:16px;width:90%;max-width:300px;text-align:center}
+.res h2{color:#ffd700;margin-bottom:6px}
+.res-score{font-size:2.5em;color:#ffd700;font-weight:bold}
+.res-label{color:#b8b8cc;margin-bottom:10px}
+.res-details{display:flex;justify-content:space-around;margin:10px 0}
+.res-detail b{display:block;color:#ffd700;font-size:1.2em}
+.res-detail span{color:#b8b8cc;font-size:0.7em}
+.record{background:rgba(255,215,0,0.2);border:1px solid #ffd700;border-radius:5px;padding:6px;margin:8px 0;color:#ffd700;font-weight:bold}
+.rating{color:#d4af37;margin-bottom:10px}
+.name-input{width:100%;padding:10px;background:rgba(255,255,255,0.1);border:2px solid rgba(212,175,55,0.5);border-radius:8px;color:#e8e8f0;font-size:1em;margin-bottom:10px;text-align:center}
+.name-input:focus{outline:none;border-color:#ffd700}
+</style>
 </head>
 <body>
-    <a href="https://hooporiapr-oss.github.io/akashic-works/" class="back-home">← Back to Home</a>
-    
-    <div class="title">⚡ Akashic Reaction Time</div>
-    <div class="subtitle">Test Your Lightning Reflexes</div>
-
-    <!-- PIN LOGIN SCREEN -->
-    <div class="container" id="pinLoginScreen">
-        <div class="pin-title">Enter PIN</div>
-        <div class="pin-subtitle">Enter your 4-digit PIN to play</div>
-        
-        <div class="pin-dots">
-            <div class="pin-dot" id="dot1"></div>
-            <div class="pin-dot" id="dot2"></div>
-            <div class="pin-dot" id="dot3"></div>
-            <div class="pin-dot" id="dot4"></div>
-        </div>
-        
-        <div class="pin-keypad">
-            <button class="pin-key" data-num="1">1</button>
-            <button class="pin-key" data-num="2">2</button>
-            <button class="pin-key" data-num="3">3</button>
-            <button class="pin-key" data-num="4">4</button>
-            <button class="pin-key" data-num="5">5</button>
-            <button class="pin-key" data-num="6">6</button>
-            <button class="pin-key" data-num="7">7</button>
-            <button class="pin-key" data-num="8">8</button>
-            <button class="pin-key" data-num="9">9</button>
-            <button class="pin-key empty"></button>
-            <button class="pin-key" data-num="0">0</button>
-            <button class="pin-key delete">⌫</button>
-        </div>
-        
-        <div class="pin-message" id="pinMessage"></div>
-        
-        <div class="pin-toggle">
-            No account? <span class="pin-toggle-link" id="showCreatePin">Create PIN</span>
-        </div>
-    </div>
-
-    <!-- PIN CREATE SCREEN -->
-    <div class="container hidden" id="pinCreateScreen">
-        <div class="pin-title" id="createPinTitle">Create PIN</div>
-        <div class="pin-subtitle" id="createPinSubtitle">Choose a 4-digit PIN</div>
-        
-        <div class="pin-dots">
-            <div class="pin-dot" id="createDot1"></div>
-            <div class="pin-dot" id="createDot2"></div>
-            <div class="pin-dot" id="createDot3"></div>
-            <div class="pin-dot" id="createDot4"></div>
-        </div>
-        
-        <div class="pin-keypad" id="createKeypad">
-            <button class="pin-key" data-num="1">1</button>
-            <button class="pin-key" data-num="2">2</button>
-            <button class="pin-key" data-num="3">3</button>
-            <button class="pin-key" data-num="4">4</button>
-            <button class="pin-key" data-num="5">5</button>
-            <button class="pin-key" data-num="6">6</button>
-            <button class="pin-key" data-num="7">7</button>
-            <button class="pin-key" data-num="8">8</button>
-            <button class="pin-key" data-num="9">9</button>
-            <button class="pin-key empty"></button>
-            <button class="pin-key" data-num="0">0</button>
-            <button class="pin-key delete">⌫</button>
-        </div>
-        
-        <div class="pin-message" id="createPinMessage"></div>
-        
-        <div class="pin-toggle">
-            Already have a PIN? <span class="pin-toggle-link" id="showLoginPin">Login</span>
-        </div>
-    </div>
-
-    <!-- DASHBOARD SCREEN -->
-    <div class="container hidden" id="dashboardScreen">
-        <div class="welcome-box">
-            <h3>Welcome Back! ⚡</h3>
-            <p style="color: #b8b8cc; margin-top: 5px;">Ready to test your reflexes?</p>
-        </div>
-        <div class="stats-grid">
-            <div class="stat-box"><div class="stat-value" id="dashTests">0</div><div class="stat-label">Tests Completed</div></div>
-            <div class="stat-box"><div class="stat-value" id="dashFastest">--</div><div class="stat-label">Fastest Time</div></div>
-            <div class="stat-box"><div class="stat-value" id="dashAverage">--</div><div class="stat-label">Average Time</div></div>
-            <div class="stat-box"><div class="stat-value" id="dashRating">--</div><div class="stat-label">Rating</div></div>
-        </div>
-        <button class="button" id="startPlayingBtn">⚡ Start Testing</button>
-        <button class="button secondary" id="dashLogoutBtn">Logout</button>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div class="container hidden" id="gameScreen">
-        <div class="user-bar">
-            <button class="button secondary" id="gameLogoutBtn" style="display: inline-block; width: auto; padding: 6px 18px; font-size: 0.9em;">Back to Menu</button>
-        </div>
-
-        <div class="game-info">
-            <div class="info-item"><div class="info-value" id="attemptDisplay">0/5</div><div class="info-label">Attempt</div></div>
-            <div class="info-item"><div class="info-value" id="bestDisplay">--</div><div class="info-label">Best</div></div>
-            <div class="info-item"><div class="info-value" id="avgDisplay">--</div><div class="info-label">Average</div></div>
-        </div>
-
-        <div class="display-area" id="displayArea">
-            <div class="message-text">Click "Start Test" to begin!<br><br>Wait for GREEN, then tap!</div>
-        </div>
-
-        <button class="button" id="startGameBtn">Start Test</button>
-        <div class="results-box hidden" id="resultsBox"></div>
-
-        <div class="instructions">
-            <h4>How to Play</h4>
-            <p>Complete 5 reaction tests. Wait for the screen to turn GREEN, then tap as fast as you can! Don't tap too early on red!</p>
-        </div>
-    </div>
-
-    <script>
-        // ==================== PIN AUTH SYSTEM ====================
-        const PIN_STORAGE_KEY = 'akashic_pin_hash';
-        const PLAYER_ID_KEY = 'akashic_player_id';
-        const STATS_KEY = 'akashic_reaction_stats';
-
-        function hashPIN(pin) {
-            let hash = 0;
-            const salted = pin + 'akashic_salt_2024';
-            for (let i = 0; i < salted.length; i++) {
-                hash = ((hash << 5) - hash) + salted.charCodeAt(i);
-                hash = hash & hash;
-            }
-            return hash.toString(36);
-        }
-
-        function generatePlayerId() {
-            return 'player_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
-        }
-
-        function hasPIN() {
-            return !!localStorage.getItem(PIN_STORAGE_KEY);
-        }
-
-        function createPIN(pin) {
-            const playerId = generatePlayerId();
-            localStorage.setItem(PIN_STORAGE_KEY, hashPIN(pin));
-            localStorage.setItem(PLAYER_ID_KEY, playerId);
-            localStorage.setItem(STATS_KEY, JSON.stringify({
-                testsCompleted: 0,
-                fastestTime: null,
-                allTimes: []
-            }));
-            return true;
-        }
-
-        function verifyPIN(pin) {
-            const storedHash = localStorage.getItem(PIN_STORAGE_KEY);
-            return storedHash === hashPIN(pin);
-        }
-
-        function getStats() {
-            const stats = localStorage.getItem(STATS_KEY);
-            return stats ? JSON.parse(stats) : { testsCompleted: 0, fastestTime: null, allTimes: [] };
-        }
-
-        function saveStats(stats) {
-            localStorage.setItem(STATS_KEY, JSON.stringify(stats));
-        }
-
-        function logout() {
-            sessionStorage.removeItem('akashic_logged_in');
-        }
-
-        // ==================== UI FUNCTIONS ====================
-        let currentPIN = '';
-        let confirmPIN = '';
-        let isConfirming = false;
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
-            document.getElementById(screenId).classList.remove('hidden');
-        }
-
-        function updatePinDots(prefix, length) {
-            for (let i = 1; i <= 4; i++) {
-                const dot = document.getElementById(prefix + i);
-                if (dot) {
-                    dot.classList.toggle('filled', i <= length);
-                }
-            }
-        }
-
-        function showPinMessage(elementId, message, isError = false) {
-            const el = document.getElementById(elementId);
-            el.textContent = message;
-            el.className = 'pin-message ' + (isError ? 'error' : 'success');
-        }
-
-        function clearPinMessage(elementId) {
-            const el = document.getElementById(elementId);
-            el.textContent = '';
-            el.className = 'pin-message';
-        }
-
-        // ==================== LOGIN PIN HANDLERS ====================
-        function handleLoginKeyPress(num) {
-            if (currentPIN.length < 4) {
-                currentPIN += num;
-                updatePinDots('dot', currentPIN.length);
-                
-                if (currentPIN.length === 4) {
-                    setTimeout(() => {
-                        if (verifyPIN(currentPIN)) {
-                            sessionStorage.setItem('akashic_logged_in', 'true');
-                            loadDashboard();
-                        } else {
-                            showPinMessage('pinMessage', 'Wrong PIN. Try again.', true);
-                            currentPIN = '';
-                            updatePinDots('dot', 0);
-                        }
-                    }, 200);
-                }
-            }
-        }
-
-        function handleLoginDelete() {
-            if (currentPIN.length > 0) {
-                currentPIN = currentPIN.slice(0, -1);
-                updatePinDots('dot', currentPIN.length);
-                clearPinMessage('pinMessage');
-            }
-        }
-
-        // ==================== CREATE PIN HANDLERS ====================
-        function handleCreateKeyPress(num) {
-            if (confirmPIN.length < 4) {
-                confirmPIN += num;
-                updatePinDots('createDot', confirmPIN.length);
-                
-                if (confirmPIN.length === 4) {
-                    setTimeout(() => {
-                        if (!isConfirming) {
-                            currentPIN = confirmPIN;
-                            confirmPIN = '';
-                            isConfirming = true;
-                            document.getElementById('createPinTitle').textContent = 'Confirm PIN';
-                            document.getElementById('createPinSubtitle').textContent = 'Enter your PIN again';
-                            updatePinDots('createDot', 0);
-                        } else {
-                            if (confirmPIN === currentPIN) {
-                                createPIN(currentPIN);
-                                sessionStorage.setItem('akashic_logged_in', 'true');
-                                showPinMessage('createPinMessage', 'PIN created!', false);
-                                setTimeout(() => loadDashboard(), 500);
-                            } else {
-                                showPinMessage('createPinMessage', 'PINs don\'t match. Try again.', true);
-                                currentPIN = '';
-                                confirmPIN = '';
-                                isConfirming = false;
-                                document.getElementById('createPinTitle').textContent = 'Create PIN';
-                                document.getElementById('createPinSubtitle').textContent = 'Choose a 4-digit PIN';
-                                updatePinDots('createDot', 0);
-                            }
-                        }
-                    }, 200);
-                }
-            }
-        }
-
-        function handleCreateDelete() {
-            if (confirmPIN.length > 0) {
-                confirmPIN = confirmPIN.slice(0, -1);
-                updatePinDots('createDot', confirmPIN.length);
-                clearPinMessage('createPinMessage');
-            }
-        }
-
-        // ==================== DASHBOARD ====================
-        function loadDashboard() {
-            const stats = getStats();
-            document.getElementById('dashTests').textContent = stats.testsCompleted || 0;
-            document.getElementById('dashFastest').textContent = stats.fastestTime ? stats.fastestTime + 'ms' : '--';
-            const avg = stats.allTimes && stats.allTimes.length > 0 
-                ? Math.round(stats.allTimes.reduce((a,b) => a+b, 0) / stats.allTimes.length) 
-                : null;
-            document.getElementById('dashAverage').textContent = avg ? avg + 'ms' : '--';
-            document.getElementById('dashRating').textContent = getRating(avg);
-            showScreen('dashboardScreen');
-        }
-
-        function getRating(avgTime) {
-            if (!avgTime) return '--';
-            if (avgTime < 200) return '⚡ Lightning';
-            if (avgTime < 250) return '🔥 Blazing';
-            if (avgTime < 300) return '⭐ Excellent';
-            if (avgTime < 350) return '👍 Good';
-            if (avgTime < 400) return '👌 Fair';
-            return '🐌 Slow';
-        }
-
-        // ==================== GAME LOGIC ====================
-        const MAX_ATTEMPTS = 5;
-        let currentAttempt = 0;
-        let roundTimes = [];
-        let gameState = 'idle';
-        let startTime = null;
-        let waitTimeout = null;
-
-        function initGame() {
-            const displayArea = document.getElementById('displayArea');
-            displayArea.className = 'display-area';
-            displayArea.innerHTML = '<div class="message-text">Click "Start Test" to begin!<br><br>Wait for GREEN, then tap!</div>';
-            document.getElementById('attemptDisplay').textContent = '0/5';
-            document.getElementById('bestDisplay').textContent = '--';
-            document.getElementById('avgDisplay').textContent = '--';
-            document.getElementById('resultsBox').classList.add('hidden');
-            currentAttempt = 0;
-            roundTimes = [];
-            gameState = 'idle';
-        }
-
-        function updateSessionDisplay() {
-            document.getElementById('attemptDisplay').textContent = currentAttempt + '/' + MAX_ATTEMPTS;
-            const best = roundTimes.length > 0 ? Math.min(...roundTimes) : null;
-            document.getElementById('bestDisplay').textContent = best ? best + 'ms' : '--';
-            const avg = roundTimes.length > 0 ? Math.round(roundTimes.reduce((a,b) => a+b, 0) / roundTimes.length) : null;
-            document.getElementById('avgDisplay').textContent = avg ? avg + 'ms' : '--';
-        }
-
-        function startTest() {
-            document.getElementById('startGameBtn').disabled = true;
-            document.getElementById('resultsBox').classList.add('hidden');
-            currentAttempt = 0;
-            roundTimes = [];
-            updateSessionDisplay();
-            startSingleAttempt();
-        }
-
-        function startSingleAttempt() {
-            currentAttempt++;
-            updateSessionDisplay();
-            
-            const displayArea = document.getElementById('displayArea');
-            displayArea.className = 'display-area waiting';
-            displayArea.innerHTML = '<div class="message-text">Wait for GREEN...</div>';
-            gameState = 'waiting';
-            startTime = null;
-            
-            const delay = 2000 + Math.random() * 3000;
-            waitTimeout = setTimeout(() => {
-                if (gameState === 'waiting') {
-                    gameState = 'ready';
-                    startTime = Date.now();
-                    displayArea.className = 'display-area ready';
-                    displayArea.innerHTML = '<div class="message-text">TAP NOW!</div>';
-                }
-            }, delay);
-        }
-
-        function handleTap() {
-            const displayArea = document.getElementById('displayArea');
-            
-            if (gameState === 'waiting') {
-                clearTimeout(waitTimeout);
-                gameState = 'idle';
-                displayArea.className = 'display-area too-soon';
-                displayArea.innerHTML = '<div class="message-text">❌ Too Soon!<br>Wait for GREEN!</div>';
-                
-                setTimeout(() => {
-                    if (currentAttempt < MAX_ATTEMPTS) {
-                        startSingleAttempt();
-                    } else {
-                        showResults();
-                    }
-                }, 1500);
-                
-            } else if (gameState === 'ready') {
-                const reactionTime = Date.now() - startTime;
-                gameState = 'idle';
-                roundTimes.push(reactionTime);
-                
-                // Update stats
-                const stats = getStats();
-                if (!stats.allTimes) stats.allTimes = [];
-                stats.allTimes.push(reactionTime);
-                if (!stats.fastestTime || reactionTime < stats.fastestTime) {
-                    stats.fastestTime = reactionTime;
-                }
-                saveStats(stats);
-                
-                updateSessionDisplay();
-                displayArea.className = 'display-area result';
-                displayArea.innerHTML = `<div class="time-display">${reactionTime}ms</div>`;
-                
-                setTimeout(() => {
-                    if (currentAttempt < MAX_ATTEMPTS) {
-                        startSingleAttempt();
-                    } else {
-                        showResults();
-                    }
-                }, 1500);
-            }
-        }
-
-        function showResults() {
-            document.getElementById('startGameBtn').disabled = false;
-            gameState = 'idle';
-            
-            const displayArea = document.getElementById('displayArea');
-            displayArea.className = 'display-area';
-            displayArea.innerHTML = '<div class="message-text">Test Complete!<br>See results below</div>';
-            
-            // Update tests completed
-            const stats = getStats();
-            stats.testsCompleted = (stats.testsCompleted || 0) + 1;
-            saveStats(stats);
-            
-            // Show results
-            const resultsBox = document.getElementById('resultsBox');
-            
-            if (roundTimes.length === 0) {
-                resultsBox.innerHTML = '<h3>No Valid Attempts</h3><div class="result-message">You clicked too early on all attempts. Try again!</div>';
-            } else {
-                const avgTime = Math.round(roundTimes.reduce((a,b) => a+b, 0) / roundTimes.length);
-                const bestTime = Math.min(...roundTimes);
-                const worstTime = Math.max(...roundTimes);
-                
-                let html = '<h3>⚡ Test Complete!</h3>';
-                html += `<div class="result-value">${avgTime}ms</div>`;
-                html += `<div class="result-message">Average Reaction Time</div>`;
-                html += `<div class="result-message">Best: ${bestTime}ms | Worst: ${worstTime}ms</div>`;
-                html += `<div class="result-message">Valid attempts: ${roundTimes.length}/${MAX_ATTEMPTS}</div>`;
-                
-                if (bestTime === stats.fastestTime) {
-                    html += `<div class="new-record">🏆 New Personal Record!</div>`;
-                }
-                
-                html += `<div class="result-message" style="color: #ffd700; font-size: 1.3em; margin-top: 20px;">Rating: ${getRating(avgTime)}</div>`;
-                
-                resultsBox.innerHTML = html;
-            }
-            
-            resultsBox.classList.remove('hidden');
-        }
-
-        // ==================== EVENT LISTENERS ====================
-        document.addEventListener('DOMContentLoaded', function() {
-            // Login keypad
-            document.querySelectorAll('#pinLoginScreen .pin-key[data-num]').forEach(key => {
-                key.addEventListener('click', () => handleLoginKeyPress(key.dataset.num));
-            });
-            document.querySelector('#pinLoginScreen .pin-key.delete').addEventListener('click', handleLoginDelete);
-            
-            // Create keypad
-            document.querySelectorAll('#pinCreateScreen .pin-key[data-num]').forEach(key => {
-                key.addEventListener('click', () => handleCreateKeyPress(key.dataset.num));
-            });
-            document.querySelector('#pinCreateScreen .pin-key.delete').addEventListener('click', handleCreateDelete);
-            
-            // Toggle links
-            document.getElementById('showCreatePin').addEventListener('click', () => {
-                currentPIN = '';
-                confirmPIN = '';
-                isConfirming = false;
-                clearPinMessage('createPinMessage');
-                document.getElementById('createPinTitle').textContent = 'Create PIN';
-                document.getElementById('createPinSubtitle').textContent = 'Choose a 4-digit PIN';
-                updatePinDots('createDot', 0);
-                showScreen('pinCreateScreen');
-            });
-            
-            document.getElementById('showLoginPin').addEventListener('click', () => {
-                currentPIN = '';
-                clearPinMessage('pinMessage');
-                updatePinDots('dot', 0);
-                showScreen('pinLoginScreen');
-            });
-            
-            // Dashboard buttons
-            document.getElementById('startPlayingBtn').addEventListener('click', () => {
-                showScreen('gameScreen');
-                initGame();
-            });
-            
-            document.getElementById('dashLogoutBtn').addEventListener('click', () => {
-                if (confirm('Logout?')) {
-                    logout();
-                    currentPIN = '';
-                    updatePinDots('dot', 0);
-                    clearPinMessage('pinMessage');
-                    showScreen('pinLoginScreen');
-                }
-            });
-            
-            document.getElementById('gameLogoutBtn').addEventListener('click', () => {
-                clearTimeout(waitTimeout);
-                loadDashboard();
-            });
-            
-            document.getElementById('startGameBtn').addEventListener('click', startTest);
-            
-            // Reaction area click/tap
-            document.getElementById('displayArea').addEventListener('click', handleTap);
-            document.getElementById('displayArea').addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                handleTap();
-            }, { passive: false });
-            
-            // Initialize
-            if (hasPIN()) {
-                showScreen('pinLoginScreen');
-            } else {
-                showScreen('pinCreateScreen');
-            }
-        });
-    </script>
+<div class="top-bar"><a href="https://hooporiapr-oss.github.io/akashic-works/" class="back">Home</a><div class="banner" id="bannerEl">3 free</div></div>
+<div class="title">Reaction Time</div>
+<div class="subtitle">Brain Training</div>
+<div class="box" id="loginBox"><div class="pin-title">Enter PIN</div><div class="pin-sub">Enter your 4-digit PIN</div><div class="dots"><div class="dot" id="d1"></div><div class="dot" id="d2"></div><div class="dot" id="d3"></div><div class="dot" id="d4"></div></div><div class="keypad" id="loginPad"></div><div class="msg" id="loginMsg"></div><div class="toggle">No account? <span id="toCreate">Create PIN</span></div></div>
+<div class="box hidden" id="createBox"><div class="pin-title" id="createTitle">Create PIN</div><div class="pin-sub" id="createSub">Choose a 4-digit PIN</div><div class="dots"><div class="dot" id="c1"></div><div class="dot" id="c2"></div><div class="dot" id="c3"></div><div class="dot" id="c4"></div></div><div class="keypad" id="createPad"></div><div class="msg" id="createMsg"></div><div class="toggle">Have a PIN? <span id="toLogin">Login</span></div></div>
+<div class="box hidden" id="nameBox"><div class="pin-title">Set Display Name</div><div class="pin-sub">Choose a name for the leaderboard</div><input type="text" class="name-input" id="nameInput" placeholder="Enter your name" maxlength="15"><button class="btn" id="saveNameBtn">Save Name</button><div class="msg" id="nameMsg"></div></div>
+<div class="box hidden" id="dashBox"><div class="welcome"><h3 id="welcomeName">Welcome!</h3><p>Test your reaction speed</p></div><div class="stats"><div class="stat"><b id="dGames">0</b><span>Games</span></div><div class="stat"><b id="dBest">--</b><span>Best (ms)</span></div><div class="stat"><b id="dAvg">--</b><span>Average</span></div><div class="stat"><b id="dRate">--</b><span>Rating</span></div></div><button class="btn" id="startBtn">Start Game</button><button class="btn btn2" id="logoutBtn">Logout</button></div>
+<div class="box hidden" id="gameBox"><div class="game-info"><div class="game-stat"><b id="gRound">1/5</b><span>Round</span></div><div class="game-stat"><b id="gBest">--</b><span>Best</span></div><div class="game-stat"><b id="gAvg">--</b><span>Average</span></div></div><div class="round-dots" id="roundDots"></div><div class="react-zone waiting" id="reactZone"><h2>Wait for green...</h2><p>Tap when the screen turns green</p></div><button class="btn btn2" id="quitBtn">Quit</button></div>
+<div class="res-bg hidden" id="resBg"><div class="res"><h2>Results</h2><div class="res-score" id="resAvg">0</div><div class="res-label">Average (ms)</div><div class="res-details"><div class="res-detail"><b id="resBest">0</b><span>Best</span></div><div class="res-detail"><b id="resWorst">0</b><span>Worst</span></div></div><div class="record hidden" id="resRecord">New Record!</div><div class="rating" id="resRating">Rating: --</div><button class="btn" id="againBtn">Play Again</button><button class="btn btn2" id="menuBtn">Menu</button></div></div>
+<div class="popup-bg hidden" id="limitPopup"><div class="popup"><h3 id="limitTitle">Daily limit reached</h3><p id="limitMsg">You used your 3 free games today</p><a href="https://hooporiapr-oss.github.io/akashic-works/">Return Home</a><button id="upgradeBtn">Unlock Unlimited</button></div></div>
+<script>
+(function(){
+var PK="ak_pins",UK="ak_users",SK="rten2_stats_",DK="rten2_device",MAX_DAILY=3,MAX_DAYS=3,ROUNDS=5;
+var currentPin="",currentUser=null,round=0,times=[],startTime=0,timeout=null,state="idle";
+function $(id){return document.getElementById(id)}
+function hash(p){var h=0,s=p+"akashic";for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h&=h}return h.toString(36)}
+function getPins(){try{return JSON.parse(localStorage.getItem(PK))||{}}catch(e){return{}}}
+function savePins(p){localStorage.setItem(PK,JSON.stringify(p))}
+function checkPin(p){return!!getPins()[hash(p)]}
+function savePin(p){var pins=getPins();pins[hash(p)]={created:Date.now()};savePins(pins)}
+function getUsers(){try{return JSON.parse(localStorage.getItem(UK))||{}}catch(e){return{}}}
+function saveUsers(u){localStorage.setItem(UK,JSON.stringify(u))}
+function getUser(h){return getUsers()[h]||null}
+function saveUser(h,d){var u=getUsers();u[h]=d;saveUsers(u)}
+function getDeviceId(){var id=localStorage.getItem(DK);if(!id){id="dev_"+Date.now()+"_"+Math.random().toString(36).substr(2,9);localStorage.setItem(DK,id)}return id}
+function getToday(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function getDeviceTries(){try{var t=JSON.parse(localStorage.getItem(DK+"_tries"));if(t&&t.startDate)return t}catch(e){}return{n:0,d:getToday(),startDate:getToday()}}
+function setDeviceTries(t){localStorage.setItem(DK+"_tries",JSON.stringify(t))}
+function getDaysDiff(s){return Math.floor((new Date()-new Date(s))/864e5)}
+function canPlay(){var t=getDeviceTries(),today=getToday(),days=getDaysDiff(t.startDate);if(days>=MAX_DAYS)return{ok:false,left:0,expired:true,daysLeft:0};if(t.d!==today){t.n=0;t.d=today;setDeviceTries(t)}return{ok:t.n<MAX_DAILY,left:MAX_DAILY-t.n,expired:false,daysLeft:MAX_DAYS-days}}
+function useTry(){var t=getDeviceTries(),today=getToday();if(t.d!==today){t.n=0;t.d=today}t.n++;setDeviceTries(t);showBanner()}
+function getStats(){try{return JSON.parse(localStorage.getItem(SK+hash(currentPin)))||{games:0,bestAvg:9999,totalAvg:0}}catch(e){return{games:0,bestAvg:9999,totalAvg:0}}}
+function setStats(s){localStorage.setItem(SK+hash(currentPin),JSON.stringify(s))}
+function showBanner(){var c=canPlay();$("bannerEl").textContent=c.expired?"Trial ended":c.left+"/"+MAX_DAILY+" (Day "+c.daysLeft+")"}
+function showLimit(){var c=canPlay();$("limitTitle").textContent=c.expired?"Free trial ended":"Daily limit reached";$("limitMsg").textContent=c.expired?"Your 3-day free trial has expired":"You used "+MAX_DAILY+" free games today. "+c.daysLeft+" day(s) remaining.";$("limitPopup").classList.remove("hidden")}
+function show(id){["loginBox","createBox","nameBox","dashBox","gameBox"].forEach(function(x){$(x).classList.add("hidden")});$(id).classList.remove("hidden")}
+function setDots(pre,n){for(var i=1;i<=4;i++){var el=$(pre+i);if(el){if(i<=n)el.classList.add("on");else el.classList.remove("on")}}}
+function setMsg(id,t,isErr){var m=$(id);m.textContent=t;m.className="msg "+(isErr?"err":"ok")}
+function getRating(ms){if(ms<200)return"Genius";if(ms<250)return"Expert";if(ms<300)return"Great";if(ms<400)return"Good";return"Learning"}
+var loginPin="",createPin="",confirmPin="",isConfirming=false;
+function buildKeypad(cid,onDigit,onDel){var c=$(cid);c.innerHTML="";for(var i=1;i<=9;i++){(function(d){var b=document.createElement("button");b.className="key";b.textContent=d;b.onclick=function(){onDigit(d)};c.appendChild(b)})(i)}var e=document.createElement("button");e.className="key empty";c.appendChild(e);var z=document.createElement("button");z.className="key";z.textContent="0";z.onclick=function(){onDigit(0)};c.appendChild(z);var del=document.createElement("button");del.className="key";del.textContent="←";del.onclick=onDel;c.appendChild(del)}
+function setupLogin(){buildKeypad("loginPad",function(d){if(loginPin.length<4){loginPin+=d;setDots("d",loginPin.length);if(loginPin.length===4){setTimeout(function(){if(checkPin(loginPin)){currentPin=loginPin;currentUser=getUser(hash(currentPin));if(currentUser&&currentUser.name)loadDash();else show("nameBox")}else{setMsg("loginMsg","Incorrect PIN",true);loginPin="";setDots("d",0)}},200)}}},function(){if(loginPin.length>0){loginPin=loginPin.slice(0,-1);setDots("d",loginPin.length);$("loginMsg").textContent=""}})}
+function setupCreate(){buildKeypad("createPad",function(d){if(confirmPin.length<4){confirmPin+=d;setDots("c",confirmPin.length);if(confirmPin.length===4){setTimeout(function(){if(!isConfirming){createPin=confirmPin;confirmPin="";isConfirming=true;$("createTitle").textContent="Confirm PIN";$("createSub").textContent="Enter the PIN again";setDots("c",0)}else{if(confirmPin===createPin){savePin(createPin);currentPin=createPin;setMsg("createMsg","PIN created!",false);setTimeout(function(){show("nameBox")},500)}else{setMsg("createMsg","PINs don't match",true);createPin="";confirmPin="";isConfirming=false;$("createTitle").textContent="Create PIN";$("createSub").textContent="Choose a 4-digit PIN";setDots("c",0)}}},200)}}},function(){if(confirmPin.length>0){confirmPin=confirmPin.slice(0,-1);setDots("c",confirmPin.length);$("createMsg").textContent=""}})}
+function loadDash(){var s=getStats();$("welcomeName").textContent="Welcome, "+(currentUser?currentUser.name:"Player")+"!";$("dGames").textContent=s.games||0;$("dBest").textContent=s.bestAvg<9999?s.bestAvg:"--";$("dAvg").textContent=s.games>0?Math.round(s.totalAvg/s.games):"--";$("dRate").textContent=s.bestAvg<9999?getRating(s.bestAvg):"--";show("dashBox");showBanner();if(!canPlay().ok)showLimit()}
+function updateRoundDots(){var c=$("roundDots");c.innerHTML="";for(var i=0;i<ROUNDS;i++){var dot=document.createElement("div");dot.className="round-dot";if(i<times.length)dot.classList.add(times[i]<0?"early":"done");else if(i===round)dot.classList.add("current");c.appendChild(dot)}}
+function updateGameStats(){var valid=times.filter(function(t){return t>0});$("gRound").textContent=(round+1)+"/"+ROUNDS;$("gBest").textContent=valid.length?Math.min.apply(null,valid):"--";$("gAvg").textContent=valid.length?Math.round(valid.reduce(function(a,b){return a+b},0)/valid.length):"--"}
+function setZone(cls,h2,p,time){var z=$("reactZone");z.className="react-zone "+cls;z.innerHTML="<h2>"+h2+"</h2>"+(time?"<div class='time'>"+time+"</div>":"")+"<p>"+p+"</p>"}
+function startRound(){state="waiting";setZone("waiting","Wait for green...","Tap when the screen turns green");var delay=1500+Math.random()*3000;timeout=setTimeout(function(){state="ready";startTime=Date.now();setZone("ready","TAP NOW!","")},delay)}
+function handleTap(){if(state==="waiting"){clearTimeout(timeout);times.push(-1);state="early";setZone("early","Too early!","Tap to continue");updateRoundDots()}else if(state==="ready"){var reaction=Date.now()-startTime;times.push(reaction);state="result";setZone("result",reaction+" ms","Tap to continue");updateRoundDots();updateGameStats()}else if(state==="early"||state==="result"){round++;if(round>=ROUNDS){endGame()}else{updateGameStats();startRound()}}else if(state==="idle"){round=0;times=[];updateRoundDots();updateGameStats();startRound()}}
+function startGame(){if(!canPlay().ok){showLimit();return}round=0;times=[];state="idle";show("gameBox");updateRoundDots();updateGameStats();setZone("waiting","Tap to start","Get ready to test your reflexes");state="idle"}
+function endGame(){var valid=times.filter(function(t){return t>0});if(valid.length===0){loadDash();return}var avg=Math.round(valid.reduce(function(a,b){return a+b},0)/valid.length);var best=Math.min.apply(null,valid);var worst=Math.max.apply(null,valid);var s=getStats();s.games++;s.totalAvg+=avg;var isRec=avg<s.bestAvg;if(isRec)s.bestAvg=avg;setStats(s);useTry();$("resAvg").textContent=avg;$("resBest").textContent=best;$("resWorst").textContent=worst;$("resRating").textContent="Rating: "+getRating(avg);if(isRec)$("resRecord").classList.remove("hidden");else $("resRecord").classList.add("hidden");$("resBg").classList.remove("hidden");if(!canPlay().ok)setTimeout(showLimit,1500)}
+document.addEventListener("DOMContentLoaded",function(){
+getDeviceId();setupLogin();setupCreate();
+$("toCreate").onclick=function(){createPin="";confirmPin="";isConfirming=false;$("createTitle").textContent="Create PIN";$("createSub").textContent="Choose a 4-digit PIN";setDots("c",0);$("createMsg").textContent="";show("createBox")};
+$("toLogin").onclick=function(){loginPin="";setDots("d",0);$("loginMsg").textContent="";show("loginBox")};
+$("saveNameBtn").onclick=function(){var name=$("nameInput").value.trim();if(name.length<2){setMsg("nameMsg","Name too short (min 2)",true);return}if(name.length>15){setMsg("nameMsg","Name too long (max 15)",true);return}currentUser={name:name,created:Date.now()};saveUser(hash(currentPin),currentUser);loadDash()};
+$("startBtn").onclick=function(){if(!canPlay().ok){showLimit();return}startGame()};
+$("logoutBtn").onclick=function(){loginPin="";currentPin="";currentUser=null;setDots("d",0);show("loginBox")};
+$("quitBtn").onclick=function(){if(timeout)clearTimeout(timeout);state="idle";loadDash()};
+$("reactZone").onclick=handleTap;
+$("againBtn").onclick=function(){$("resBg").classList.add("hidden");if(!canPlay().ok){showLimit();return}startGame()};
+$("menuBtn").onclick=function(){$("resBg").classList.add("hidden");loadDash()};
+$("upgradeBtn").onclick=function(){location.href="mailto:support@akashic.works?subject=Pro%20Upgrade"};
+show("loginBox");showBanner()
+})
+})();
+</script>
 </body>
 </html>
